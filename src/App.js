@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import "./App.css";
 import Search from "./Search";
 import Table from "./Table";
-import Button from "./Button";
 import fetch from "isomorphic-fetch";
+import ButtonWithSpinner from "./Button";
 
 const PATH_BASE = "https://hn.algolia.com/api/v1";
 const PATH_SEARCH = "/search";
@@ -27,7 +27,10 @@ class App extends Component {
       results: null,
       searchKey: "",
       searchTerm: DEFAULT_QUERY,
-      error: null
+      sortKey: "NONE",
+      isSortReverse: false,
+      error: null,
+      isLoading: false
     };
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
@@ -36,6 +39,7 @@ class App extends Component {
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
+    this.onSort = this.onSort.bind(this);
   }
 
   setSearchTopStories(result) {
@@ -51,11 +55,13 @@ class App extends Component {
       results: {
         ...results,
         [searchKey]: { hits: updatedHits, page }
-      }
+      },
+      isLoading: false
     });
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
+    this.setState({ isLoading: true });
     fetch(
       `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`
     )
@@ -103,8 +109,22 @@ class App extends Component {
     event.target[0].blur();
   }
 
+  onSort(sortKey) {
+    const isSortReverse =
+      this.state.sortKey === sortKey && !this.state.isSortReverse;
+    this.setState({ sortKey, isSortReverse });
+  }
+
   render() {
-    const { searchTerm, results, searchKey, error } = this.state;
+    const {
+      searchTerm,
+      results,
+      searchKey,
+      error,
+      isLoading,
+      sortKey,
+      isSortReverse
+    } = this.state;
     // console.log(searchTerm, searchKey, results);
     const page =
       (results && results[searchKey] && results[searchKey].page) || 0;
@@ -131,14 +151,21 @@ class App extends Component {
               <p>Something went wrong.</p>
             </div>
           ) : (
-            <Table list={list} onDismiss={this.onDismiss} />
+            <Table
+              list={list}
+              onDismiss={this.onDismiss}
+              sortKey={sortKey}
+              onSort={this.onSort}
+              isSortReverse={isSortReverse}
+            />
           )}
           <div className="interactions">
-            <Button
+            <ButtonWithSpinner
+              isLoading={isLoading}
               onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
             >
               More
-            </Button>
+            </ButtonWithSpinner>
           </div>
         </div>
       </div>
@@ -148,4 +175,4 @@ class App extends Component {
 
 export default App;
 
-export { Button, Search, Table };
+export { ButtonWithSpinner, Search, Table };

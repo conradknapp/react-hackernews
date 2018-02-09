@@ -1,4 +1,5 @@
 import React from "react";
+import Spinner from "./Spinner";
 
 const Button = ({ onClick, className = "", children }) => {
   return (
@@ -8,4 +9,9 @@ const Button = ({ onClick, className = "", children }) => {
   );
 };
 
-export default Button;
+const withSpinner = Component => ({ isLoading, ...rest }) =>
+  isLoading ? <Spinner /> : <Component {...rest} />;
+
+const ButtonWithSpinner = withSpinner(Button);
+
+export default ButtonWithSpinner;
