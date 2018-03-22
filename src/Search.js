@@ -1,16 +1,15 @@
 import React from "react";
 
-const Search = class extends React.Component {
+class Search extends React.Component {
   componentDidMount() {
     if (this.input) {
       const text = "javascript";
       text.split("").map((el, i) => {
         setTimeout(() => {
           this.input.value = this.input.value + el;
-        }, i * 100);
+        }, i * 200);
       });
       this.input.focus();
-      // setTimeout(() => this.input.focus(), 2000);
     }
   }
 
@@ -29,6 +28,6 @@ const Search = class extends React.Component {
       </form>
     );
   }
-};
+}
 
 export default Search;
